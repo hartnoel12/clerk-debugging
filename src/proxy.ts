@@ -123,10 +123,7 @@ export default clerkMiddleware(async (auth, req) => {
 
     // For protected API routes, enforce authentication
     if (!userId) {
-      const apiUnauthorizedResponse = NextResponse.json(
-        { error: 'Authentication required' },
-        { status: 401 }
-      );
+      const apiUnauthorizedResponse = NextResponse.next();
       addCorsHeaders(apiUnauthorizedResponse, origin, host);
       return apiUnauthorizedResponse;
     }
@@ -197,7 +194,6 @@ export default clerkMiddleware(async (auth, req) => {
 
 export const config = {
   matcher: [
-    '/((?!_next/static|_next/image|favicon.ico).*)',
     '/api/(.*)',
   ],
 };
