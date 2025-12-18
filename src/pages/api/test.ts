@@ -6,10 +6,6 @@ import { AuthorizationService } from '../../lib/auth/authorization';
 
 const authService = new AuthorizationService();
 
-// Force Node.js runtime to ensure Clerk auth context is properly passed from Edge middleware
-export const config = {
-  runtime: 'nodejs',
-};
 
 /**
  * Test API endpoint to demonstrate authentication

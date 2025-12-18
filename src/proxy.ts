@@ -70,6 +70,13 @@ function isInviteCodeValidation(pathname: string): boolean {
  * This ensures Clerk can detect middleware usage for getAuth() to work in API routes
  */
 export default clerkMiddleware(async (auth, req) => {
+  // Diagnostic logging to verify middleware is executing
+  console.log('[MIDDLEWARE] EXECUTING for:', req.nextUrl.pathname, {
+    method: req.method,
+    url: req.url,
+    hasCookies: !!req.headers.get('cookie'),
+  });
+  
   const pathname = req.nextUrl.pathname;
   const origin = req.headers.get('origin');
   const host = req.headers.get('host');
@@ -96,15 +103,27 @@ export default clerkMiddleware(async (auth, req) => {
   // Handle API routes first - call auth() for ALL API routes to set up Clerk's context
   // This is essential for getAuth() to detect clerkMiddleware() was used
   if (isApiRoute(pathname)) {
+    console.log('[MIDDLEWARE] Processing API route:', pathname);
     let userId: string | null = null;
     let sessionId: string | null = null;
 
     try {
+      console.log('[MIDDLEWARE] Calling auth() for API route...');
       const authResult = await auth();
       userId = authResult.userId;
       sessionId = authResult.sessionId;
+      console.log('[MIDDLEWARE] auth() result:', {
+        hasUserId: !!userId,
+        userId: userId || null,
+        hasSessionId: !!sessionId,
+      });
     } catch (authError) {
       // Continue - auth() may fail for unauthenticated requests, but context is still set up
+      console.error('[MIDDLEWARE] Error calling auth() for API route:', {
+        pathname,
+        error: authError instanceof Error ? authError.message : 'Unknown error',
+        stack: authError instanceof Error ? authError.stack : undefined,
+      });
       logger.warn('Error calling auth() for API route', {
         pathname,
         error: authError instanceof Error ? authError.message : 'Unknown error',
